@@ -148,19 +148,21 @@ export class ImageUpload {
 	 * @param {Event} evt
 	//  */
 	handlePaste(evt) {
+		const Delta = Quill.import('delta');
 		if (evt.clipboardData && evt.clipboardData.items && evt.clipboardData.items.length) {
 			this.readFiles(evt.clipboardData.items, dataUrl => {
 				const selection = this.quill.getSelection();
 				if (selection) {
-					// we must be in a browser that supports pasting (like Firefox)
-					// so it has already been placed into the editor
+				 	// we must be in a browser that supports pasting (like Firefox)
+				 	// so it has already been placed into the editor, let's remove the node
+				 	this.quill.updateContents(new Delta()
+				 		.retain(selection.index - 1)
+				 		.delete(1));
 				}
-				else {
-					// otherwise we wait until after the paste when this.quill.getSelection()
-					// will return a valid index
-					// setTimeout(() => this.insert(dataUrl), 0);
-					setTimeout(() => this.sendToServer(dataUrl), 0);
-				}
+				// otherwise we wait until after the paste when this.quill.getSelection()
+				// will return a valid index
+				// setTimeout(() => this.insert(dataUrl), 0);
+				setTimeout(() => this.sendToServer(dataUrl.getAsFile()), 0);
 			});
 		}
 	}
